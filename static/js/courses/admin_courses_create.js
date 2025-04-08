@@ -2,12 +2,12 @@ const imagePreview = document.getElementsByClassName("course-image-preview")[0];
 const imageInput = document.getElementById("courseImage");
 const addCourseForm = document.getElementsByClassName("add-course-form")[0];
 const addLessonBtn = document.getElementsByClassName("add-lesson-btn")[0];
-const rmLessonBtn = document.getElementsByClassName("course-lesson-delete")[0];
-const lessons = document.getElementsByClassName("course-lesson-list")[0];
+const rmLessonBtns = document.getElementsByClassName("course-lesson-delete");
+const lessonContainer = document.getElementsByClassName("course-lesson-list")[0];
 let numberOfLessons = 1;
 
 document.addEventListener("DOMContentLoaded", async () => {
-    const newLesson = `<div class="course-lesson-card">
+    const newLesson = `<div class="course-lesson-card" id="lesson${numberOfLessons}">
                     <div class="lesson-card-header">
                         <span class="course-lesson-number">Lesson ${numberOfLessons}</span>
                         <i class='bx bx-x course-lesson-delete lesson-${numberOfLessons}'></i>
@@ -60,9 +60,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                         </label>
                         
                     </div>`
-    const newLessonNode = document.createElement('div');
-    newLessonNode.innerHTML = newLesson;
-    lessons.appendChild(newLessonNode);
+    lessonContainer.insertAdjacentHTML('beforeend', newLesson);
 });
 
 imageInput.addEventListener('change', function () {
@@ -75,7 +73,7 @@ imageInput.addEventListener('change', function () {
 
 addLessonBtn.addEventListener('click',  () => {
     numberOfLessons++;
-    const newLesson = `<div class="course-lesson-card">
+    const newLesson = `<div class="course-lesson-card" id="lesson${numberOfLessons}" data-index="${numberOfLessons}">
                     <div class="lesson-card-header">
                         <span class="course-lesson-number">Lesson ${numberOfLessons}</span>
                         <i class='bx bx-x course-lesson-delete lesson-${numberOfLessons}'></i>
@@ -128,13 +126,40 @@ addLessonBtn.addEventListener('click',  () => {
                         </label>
                         
                     </div>`
-    const newLessonNode = document.createElement('div');
-    newLessonNode.innerHTML = newLesson;
-    lessons.appendChild(newLessonNode);
+    lessonContainer.insertAdjacentHTML('beforeend', newLesson);
 });
 
-rmLessonBtn.addEventListener('click', () => {
+const updateLessonOrder = () => {
+    const lessonDivs = document.querySelectorAll(".course-lesson-card");
+    lessonDivs.forEach((lesson, index) => {
+        const newIndex = index + 1;
+        lesson.setAttribute('data-index', newIndex);
+        lesson.querySelector('.course-lesson-number').textContent = `Lesson ${newIndex}`;
+        lesson.querySelector('.lesson-name-input').id = `lessonName_${newIndex}`;
+        lesson.querySelector('.lesson-name-input').name = `lessonName_${newIndex}`;
+        lesson.querySelectorAll('.form-label')[0].htmlFor = `lessonName_${newIndex}`;
 
+        lesson.querySelector('.lesson-video-input').id = `lessonVideo_${newIndex}`;
+        lesson.querySelector('.lesson-name-input').name = `lessonVideo_${newIndex}`;
+        lesson.querySelectorAll('.form-label')[1].htmlFor = `lessonVideo_${newIndex}`;
+
+        lesson.querySelector('.lesson-content-input').id = `lessonContent_${newIndex}`;
+        lesson.querySelector('.lesson-content-input').name = `lessonContent_${newIndex}`;
+        lesson.querySelectorAll('.form-label')[2].htmlFor = `lessonContent_${newIndex}`;
+    });
+};
+
+const handleDeleteLesson = (e) => {
+    numberOfLessons--;
+    const lessonDiv = e.target.closest(".course-lesson-card");
+    lessonDiv.remove();
+    updateLessonOrder();
+};
+
+lessonContainer.addEventListener('click', (e) => {
+    if (e.target.classList.contains('course-lesson-delete')) {
+        handleDeleteLesson(e);
+    }
 });
 
 addCourseForm.addEventListener('submit', (e) => {
