@@ -1,0 +1,79 @@
+{% extends './layout/admin_base.html'%}
+{%block style%}
+<link href="{{url_for('static',filename='css/admin_courses.css')}}" rel="stylesheet" />
+{%endblock%}
+{% block content %}
+<div class="courses-page">
+    <div class="courses-header">
+        <div class="courses-header-title align-left">
+            <h2 class="">Courses</h2>
+        </div>
+       
+        <div class="courses-header-action align-right">
+            <a href="/admin/courses/new" class="add-btn align-center">
+                <i class='bx bx-plus add-icon'></i>
+                <span>New Course</span> 
+            </a>
+        </div>
+        
+    </div>
+    <div class="courses-content">
+        <div class="courses-content-filter"></div>
+        <table class="courses-content-table">
+            <thead>
+                <tr class="courses-table-head">
+                    <th class="align-left">Course ID</th>
+                    <th class="align-left">Image</th>
+                    <th class="align-left">Course Name</th>
+                    <th class="align-right">Price</th>
+                    <th class="align-center">Date Updated</th>
+                    <th class="align-center">Status</th>
+                    <th class="align-center">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="courses-table-data">
+                    <td class="align-left">1</td>
+                    <td class="align-left">
+                        <img 
+                            src="{{url_for('static', filename='images/course_placeholder.svg')}}" 
+                            alt="Course 1"/>
+                    </td>
+                    <td class="align-left">Course 1</td>
+                    <td class="align-right">$100</td>
+                    <td class="align-center">2022-01-01</td>
+                    <td class="align-center">Published</td>
+                    <td class="align-center">
+                        <a href="/admin/courses/update/320820358" class="edit-btn">
+                            <i class='bx bx-pencil edit-icon'></i>
+                        </a>
+                        <button type="button" class="delete-btn">
+                            <i class="bx bx-trash delete-icon"></i>
+                        </button>
+                    </td>
+                </tr>
+                <tr class="courses-table-data">
+                    <td class="align-left">2</td>
+                    <td class="align-left">
+                        <img 
+                            src="{{url_for('static', filename='images/course_placeholder.svg')}}" 
+                            alt="Course 2"/>
+                    </td>
+                    <td class="align-left">Course 2</td>
+                    <td class="align-right">$200</td>
+                    <td class="align-center">2022-01-01</td>
+                    <td class="align-center">Published</td>
+                    <td class="align-center">
+                        <a href="/admin/courses/update/320820358" class="edit-btn">
+                            <i class='bx bx-pencil edit-icon'></i>
+                        </a>
+                        <button type="button" class="delete-btn">
+                            <i class="bx bx-trash delete-icon"></i>
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
