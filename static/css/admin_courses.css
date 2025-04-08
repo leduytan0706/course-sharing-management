@@ -57,7 +57,7 @@
             .courses-table-head, .courses-table-data{
                 box-sizing: border-box;
                 display: grid;
-                grid-template-columns: auto 10% 40% 10% 10% 10% 10%;
+                grid-template-columns: auto 10% 50% 10% 10% 10%;
                 background-color: white;
             }
 
@@ -98,12 +98,12 @@
 
                     }
 
-                    .edit-btn{
+                    .course-edit-btn{
                         padding: 0.3rem;
                         background-color: white;
 
                         .edit-icon{
-                            color: rgb(149, 149, 0);
+                            color: rgb(177, 177, 2);
                         }
 
                         &:hover{
@@ -113,7 +113,7 @@
                         }
                     }
 
-                    .delete-btn{
+                    .course-delete-btn{
                         background-color: white;
                         padding: 0.3rem;
                         border: none;

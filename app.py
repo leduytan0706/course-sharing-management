@@ -2,12 +2,14 @@ from flask import Flask, render_template, request, url_for, jsonify
 from datetime import date, datetime, time
 from babel.dates import format_date, format_datetime, format_time
 from sqlalchemy.exc import SQLAlchemyError
+from flask_migrate import Migrate
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI']="sqlite:///app.db"
 app.secret_key="WEB_DEV_COURSE"
 
 from db import db, Category, Course, Lesson, User
+migrate = Migrate(app, db)
 db.init_app(app)
     
 with app.app_context():

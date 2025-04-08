@@ -248,6 +248,25 @@ body{
     border-right: 2px solid var(--main-color);
 }
 
+#backdrop{
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* màu đen trong suốt */
+    z-index: 999; /* để nằm trên mọi thứ khác */
+    display: none; /* ẩn ban đầu */
+}
+
+.backdrop-show{
+    display: block;
+}
+
+.modal-hidden{
+    display: none;
+}
+
 
 @keyframes submenu {
     0% {

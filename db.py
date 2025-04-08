@@ -47,6 +47,7 @@ class Course(db.Model):
     number_of_lessons = db.Column(db.Integer, default=0)
     teacher_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     image_url = db.Column(db.Text, default="")
+    status = db.Column(db.String(20), default="Published")
 
     lessons = db.relationship('Lesson', backref='course', cascade="all, delete-orphan")
     category = db.relationship('Category', backref='courses')
@@ -64,8 +65,9 @@ class Course(db.Model):
             'created_at': self.created_at,
             'number_of_lessons': self.number_of_lessons,
             'teacher': self.teacher.to_dict() if self.teacher else None,
-            'image_url': self.image_url,
-            'lessons': [lesson.to_dict() for lesson in self.lessons]
+            'image_url': self.image_url if self.image_url else "",
+            'lessons': [lesson.to_dict() for lesson in self.lessons],
+            'status': self.status
         }
 
 class Lesson(db.Model):
