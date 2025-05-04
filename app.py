@@ -3,10 +3,21 @@ from datetime import date, datetime, time
 from babel.dates import format_date, format_datetime, format_time
 from sqlalchemy.exc import SQLAlchemyError
 from flask_migrate import Migrate
+import cloudinary
+import cloudinary.uploader
+from cloudinary.utils import cloudinary_url
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI']="sqlite:///app.db"
 app.secret_key="WEB_DEV_COURSE"
+
+# Configuration       
+cloudinary.config( 
+    cloud_name = "dtlz0jfb6", 
+    api_key = "364415425436136", 
+    api_secret = "ukOrpbutb-rc6eIpyKcykK-J5wI", # Click 'View API Keys' above to copy your API secret
+    secure=True
+)
 
 from db import db, Category, Course, Lesson, User
 migrate = Migrate(app, db)
@@ -24,16 +35,24 @@ def index():
 def courses_page(): 
     return render_template("admin_courses.html")
 
+@app.route("/admin/courses/<int:id>", methods=["GET"])
+def detail_course_page(id):
+    return render_template("courses/admin_courses_detail.html")
+
 @app.route("/admin/courses/new", methods=["GET"])
 def add_course_page():
     return render_template("courses/admin_courses_create.html")
 
 @app.route("/admin/courses/update/<int:id>", methods=["GET"])
-def update_course_form():
+def update_course_page(id):
     if request.method == "POST":
         pass
 
     return render_template("courses/admin_courses_update.html")
+
+@app.route("/admin/lessons", methods=["GET"])
+def lessons_page(): 
+    return render_template("admin_lessons.html")
 
 @app.route("/api/admin/courses", methods=["GET"])
 def get_courses():
@@ -81,28 +100,32 @@ def add_course():
         new_course_data = {
             "name": request.form.get("name"),
             "intro": request.form.get("intro"),
-            "image": request.files.get("image"),
+            "image": request.files.get("image",""),
             "number_of_lessons": request.form.get("number_of_lessons"),
             "category": request.form.get("category"),
             "level": request.form.get("level"),
             "description": request.form.get("description")
         }
+        print(new_course_data)
 
-        image_url = ""
+        # image_url = ""
         # Logic gửi dữ liệu ảnh lên cloudinary
-        # image_url = cloudinary.uploader.upload(new_course["image"])
+        image_url = ""
+        if new_course_data["image"]:
+            image_url = cloudinary.uploader.upload(new_course_data["image"])
 
         # Lấy id user từ cookie
-        # user_id = request.get_cookie('user', "")
+        user_id = 2
 
         new_course = Course(
             name=new_course_data["name"],
             intro=new_course_data["intro"],
-            image_url=image_url if image_url else None,
+            image_url=image_url if image_url else "",
             number_of_lessons=new_course_data["number_of_lessons"],
             category_id=new_course_data["category"],
             level=new_course_data["level"],
-            description=new_course_data["description"]
+            description=new_course_data["description"],
+            teacher_id=user_id
         )
 
         for i in range(1, int(new_course_data["number_of_lessons"])+1):
@@ -112,12 +135,13 @@ def add_course():
             lesson_video_url = ""
 
             # Thêm logic xử lý gửi video lên cloudinary sau đó nhận url về và thêm vào
-            # lesson_video_url = cloudinary.uploader.upload(lesson_video)
+            if lesson_video:
+                lesson_video_url = cloudinary.uploader.upload(lesson_video)
 
             new_lesson = Lesson(
                 name=lesson_name,
                 content=lesson_content,
-                video_url=lesson_video_url if lesson_video_url else None
+                video_url=lesson_video_url if lesson_video_url else ""
             )
             new_course.lessons.append(new_lesson)
 
@@ -138,6 +162,35 @@ def add_course():
         "message": "Page not found"
     }), 404
 
+@app.route("/api/admin/courses/update/<int:id>", methods=["PUT"])
+def update_course():
+    return ""
+
+@app.route("/api/admin/lessons", methods=["GET", "POST"])
+def get_lessons(): 
+    return render_template("admin_lessons.html")
+
+@app.route("/api/admin/teachers", methods=["GET"])
+def get_teachers(): 
+    try:
+        teachers = User.query.filter(User.role=="teacher").all()
+        if not teachers:
+            return jsonify({
+                "message": "No courses found"
+            }), 404
+
+        teachers_dict = [teacher.to_dict() for teacher in teachers]
+
+        return jsonify({
+            "teachers": teachers_dict
+        }), 200
+
+    except SQLAlchemyError as e:
+        print("Error getting courses:", e)
+        return jsonify({
+            "message": "There was an error getting courses. Try again later."
+        }), 500
+
 @app.route("/api/category", methods=["GET", "POST"])
 def get_categories():
     categories = []
@@ -155,6 +208,11 @@ def get_categories():
     return jsonify({
         "categories": categories_dict
     })
+
+@app.route('/api/image-placeholder')
+def get_image_url():
+    url = url_for('static', filename='images/course_placeholder.svg')
+    return jsonify({'image_url': url}), 200
 
 
 if __name__ == '__main__':

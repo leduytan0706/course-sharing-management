@@ -1,66 +1,107 @@
 const imagePreview = document.getElementsByClassName("course-image-preview")[0];
 const imageInput = document.getElementById("courseImage");
-const addCourseForm = document.getElementsByClassName("add-course-form")[0];
-const addLessonBtn = document.getElementsByClassName("add-lesson-btn")[0];
+const updateCourseForm = document.getElementsByClassName("update-course-form")[0];
+const updateLessonBtn = document.getElementsByClassName("update-lesson-btn")[0];
 const rmLessonBtns = document.getElementsByClassName("course-lesson-delete");
 const lessonContainer = document.getElementsByClassName("course-lesson-list")[0];
+let courseId = null;
 let numberOfLessons = 1;
 
 document.addEventListener("DOMContentLoaded", async () => {
-    const newLesson = `<div class="course-lesson-card" id="lesson${numberOfLessons}">
-                    <div class="lesson-card-header">
-                        <span class="course-lesson-number">Lesson ${numberOfLessons}</span>
-                        <i class='bx bx-x course-lesson-delete lesson-${numberOfLessons}'></i>
-                    </div>
-                    <div class="form-field lesson-name-field">
-                        <label for="lessonName_${numberOfLessons}" class="form-label">
-                            <span class="field-name lesson-name">Lesson Name</span>
-                            <input 
-                                type="text"
-                                id="lessonName_${numberOfLessons}"
-                                name="lessonName_${numberOfLessons}"
-                                class="form-input lesson-name-input"
-                                placeholder="Enter the name of this lesson"
-                            />
-                        </label>
-                        
-                    </div>
-                    <div class="form-field lesson-video-field">
-                        <label for="lessonVideo_${numberOfLessons}" class="form-label">
-                            <span class="field-name lesson-video">Lesson Video</span>
-                            <input 
-                                type="file"
-                                id="lessonVideo_${numberOfLessons}"
-                                name="lessonVideo_${numberOfLessons}"
-                                class="form-input lesson-video-input"
-                                accept="video/*"
-                            />
-                            <video 
-                                id="videoPreview" 
-                                class="lesson-video-preview" 
-                                style="display: none;"
-                                controls 
-                                width="400">
-                            </video>
-                        </label>
-                        
-                    </div>
-                    <div class="form-field lesson-content-field">
-                        <label for="lessonContent_${numberOfLessons}" class="form-label">
-                            <span class="field-name lesson-name">Lesson Content</span>
-                            <textarea 
-                                id="lessonContent_${numberOfLessons}"
-                                name="lessonContent_${numberOfLessons}"
-                                class="form-input lesson-content-input"
-                                cols="100" 
-                                rows="7" 
-                            >
-                            </textarea>
+    const pathParts = window.location.pathname.split('/');
+    courseId = pathParts[pathParts.length - 1];
 
-                        </label>
-                        
-                    </div>`
-    lessonContainer.insertAdjacentHTML('beforeend', newLesson);
+    console.log("Course ID:", courseId); // "1"
+    let courseData;
+    fetch('/api/admin/courses/'+courseId, {
+        method: 'GET',
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Course data:', data);
+        const courseData = data.course;
+        numberOfLessons = courseData.lessons.length;
+        const courseLessons = courseData.lessons;
+        let existingLessons = ``;
+
+        // assign course data
+        updateCourseForm.elements["courseName"].value=courseData.name || "";
+        updateCourseForm.elements["courseIntro"].value=courseData.intro || "";
+        updateCourseForm.elements["numOfLessons"].value=courseData.number_of_lessons || "";
+        updateCourseForm.elements["courseCategory"].value=courseData.category.name || "";
+        updateCourseForm.elements["courseLevel"].value=courseData.level || "";
+        updateCourseForm.elements["courseDescription"].value=courseData.description || "";
+        console.log(courseData.image_url);
+        imagePreview.src=courseData.image_url || "";
+
+        // asign existing lessons data
+        for (let i=0;i<numberOfLessons;i++){
+            existingLessons = existingLessons + `
+            <div class="course-lesson-card" id="lesson${i+1}">
+                <div class="lesson-card-header">
+                    <span class="course-lesson-number">Lesson ${i+1}</span>
+                    <i class='bx bx-x course-lesson-delete lesson-${i+1}'></i>
+                </div>
+                <div class="form-field lesson-name-field">
+                    <label for="lessonName_${i+1}" class="form-label">
+                        <span class="field-name lesson-name">Lesson Name</span>
+                        <input 
+                            type="text"
+                            id="lessonName_${i+1}"
+                            name="lessonName_${i+1}"
+                            class="form-input lesson-name-input"
+                            placeholder="Enter the name of this lesson"
+                            value="${courseLessons[i].name || ""}"
+                        />
+                    </label>
+                    
+                </div>
+                <div class="form-field lesson-video-field">
+                    <label for="lessonVideo_${i+1}" class="form-label">
+                        <span class="field-name lesson-video">Lesson Video</span>
+                        <input 
+                            type="file"
+                            id="lessonVideo_${i+1}"
+                            name="lessonVideo_${i+1}"
+                            class="form-input lesson-video-input"
+                            accept="video/*"
+                        />
+                        <video 
+                            id="videoPreview" 
+                            class="lesson-video-preview" 
+                            style="display: none;"
+                            controls 
+                            width="400"
+                            value="${courseLessons[i].video_url || ""}">
+                        </video>
+                    </label>
+                    
+                </div>
+                <div class="form-field lesson-content-field">
+                    <label for="lessonContent_${i+1}" class="form-label">
+                        <span class="field-name lesson-name">Lesson Content</span>
+                        <textarea 
+                            id="lessonContent_${i+1}"
+                            name="lessonContent_${i+1}"
+                            class="form-input lesson-content-input"
+                            cols="100" 
+                            rows="7" 
+                            value=""
+                        >
+                            ${courseLessons[i].content || ""}
+                        </textarea>
+
+                    </label>
+                    
+                </div>
+            </div>`
+        }
+
+            lessonContainer.insertAdjacentHTML('beforeend', existingLessons);
+        })
+    .catch(err => console.error('Error:', err));
+
+    
 });
 
 imageInput.addEventListener('change', function () {
@@ -71,7 +112,7 @@ imageInput.addEventListener('change', function () {
     }
 });
 
-addLessonBtn.addEventListener('click',  () => {
+updateLessonBtn.addEventListener('click',  () => {
     numberOfLessons++;
     const newLesson = `<div class="course-lesson-card" id="lesson${numberOfLessons}" data-index="${numberOfLessons}">
                     <div class="lesson-card-header">
@@ -162,29 +203,29 @@ lessonContainer.addEventListener('click', (e) => {
     }
 });
 
-addCourseForm.addEventListener('submit', (e) => {
+updateCourseForm.addEventListener('submit', (e) => {
     e.preventDefault();
     
 
-    const numOfLessons = parseInt(addCourseForm.elements['numOfLessons'].value) || numberOfLessons;
+    const numOfLessons = parseInt(updateCourseForm.elements['numOfLessons'].value) || numberOfLessons;
     console.log(numOfLessons);
 
     const formData = new FormData();
 
     // Thêm thông tin khóa học
-    formData.append('name', addCourseForm.elements['courseName'].value);
-    formData.append('intro', addCourseForm.elements['courseIntro'].value);
-    formData.append('image', addCourseForm.elements['courseImage'].files[0]); // Lưu ý .files[0]
+    formData.append('name', updateCourseForm.elements['courseName'].value);
+    formData.append('intro', updateCourseForm.elements['courseIntro'].value);
+    formData.append('image', updateCourseForm.elements['courseImage'].files[0]); // Lưu ý .files[0]
     formData.append('number_of_lessons', numberOfLessons);
-    formData.append('category', addCourseForm.elements['courseCategory'].value);
-    formData.append('level', addCourseForm.elements['courseLevel'].value);
-    formData.append('description', addCourseForm.elements['courseDescription'].value);
+    formData.append('category', updateCourseForm.elements['courseCategory'].value);
+    formData.append('level', updateCourseForm.elements['courseLevel'].value);
+    formData.append('description', updateCourseForm.elements['courseDescription'].value);
 
     // Thêm từng bài học
     for (let i = 1; i <= numberOfLessons; i++) {
-        const name = addCourseForm.elements[`lessonName_${i}`].value;
-        const video = addCourseForm.elements[`lessonVideo_${i}`].files[0];
-        const content = addCourseForm.elements[`lessonContent_${i}`].value;
+        const name = updateCourseForm.elements[`lessonName_${i}`].value;
+        const video = updateCourseForm.elements[`lessonVideo_${i}`].files[0];
+        const content = updateCourseForm.elements[`lessonContent_${i}`].value;
 
         formData.append(`lessons[${i}][name]`, name);
         formData.append(`lessons[${i}][video]`, video);
@@ -192,15 +233,15 @@ addCourseForm.addEventListener('submit', (e) => {
     }
 
     // Gửi lên backend
-    fetch('/api/admin/courses/new', {
-        method: 'POST',
+    fetch('/api/admin/courses/update/'+courseId, {
+        method: 'PUT',
         body: formData
     })
     .then(response => response.json())
     .then(data => {
         console.log('Upload success:', data);
-        const newCourseId = data.course_id;
-        window.location.href = '/admin/courses/'+newCourseId;
+        const updatedCourseId = data.course_id;
+        window.location.href = '/admin/courses/'+updatedCourseId;
     })
     .catch(err => console.error('Error:', err));
 

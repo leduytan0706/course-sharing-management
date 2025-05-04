@@ -1,7 +1,8 @@
 const coursesTableBody = document.getElementById("courses-table-body");
 const backdropContainer = document.getElementById("backdrop");
 const backdropModal = document.getElementById("modal");
-
+const courseBody = document.getElementById("courses-table-body");
+let courseTableRows;
 const confirmBtn = document.querySelectorAll("confirm-btn");
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -17,12 +18,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     })
     .then(coursesData => {
         coursesData.forEach((course,index) => {
-            const courseRow = `<tr class="courses-table-data" data-index="{{${index}}}">
-                    <td class="align-left">1</td>
+            const courseRow = `<tr class="courses-table-data" data-index="${index}" id="courseId-${course.id}">
+                    <td class="align-left">${index+1}</td>
                     <td class="align-left">
                         <img 
                             src=${course.image_url || "/static/images/course_placeholder.svg"} 
-                            alt="Course ${index}"
+                            alt="Course ${index+1}"
                         />
                     </td>
                     <td class="align-left">${course.name}</td>
@@ -40,16 +41,21 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             coursesRow += courseRow;
         });
+
+        
+        coursesTableBody.innerHTML = coursesRow;
+
+        courseTableRows = courseBody.childNodes;
+
+        handleCourseClick();
+
+        handleCourseDeleteBtns();
+
+        handleCourseCancelBtns();
     })
     .catch((err) => {
         console.log(err);
-    });
-
-    coursesTableBody.innerHTML = coursesRow;
-
-    handleCourseDeleteBtns();
-
-    handleCourseCancelBtns();
+    }); 
     
 });
 
@@ -84,4 +90,14 @@ const handleCourseCancelBtns = () => {
         });
     });
 };
+
+const handleCourseClick = () => {
+    courseTableRows.forEach(courseRow => {
+        courseRow.addEventListener("click", () => {
+            const courseId = courseRow.id.split("-")[1];
+            console.log(courseId);
+            window.location.href = '/admin/courses/'+courseId;
+        })
+    })
+}
 

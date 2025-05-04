@@ -60,11 +60,11 @@ class Course(db.Model):
             'intro': self.intro,
             'level': self.level,
             'description': self.description,
-            'category': self.category.to_dict() if self.category else None,
+            'category': self.category.to_dict() if self.category else "",
             'number_of_students': self.number_of_students,
             'created_at': self.created_at,
             'number_of_lessons': self.number_of_lessons,
-            'teacher': self.teacher.to_dict() if self.teacher else None,
+            'teacher': self.teacher.to_dict() if self.teacher else "",
             'image_url': self.image_url if self.image_url else "",
             'lessons': [lesson.to_dict() for lesson in self.lessons],
             'status': self.status
