@@ -76,6 +76,10 @@ class Lesson(db.Model):
     course_id = db.Column(db.Integer, db.ForeignKey("course.id"))
     content = db.Column(db.Text, nullable=False)
     video_url = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
+    teacher_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+
+    teacher = db.relationship('User',backref='lessons')
 
     def to_dict(self):
         return {
@@ -83,7 +87,9 @@ class Lesson(db.Model):
             'name': self.name,
             'course_id': self.course_id,
             'content': self.content,
-            'video_url': self.video_url
+            'video_url': self.video_url,
+            'teacher': self.teacher.to_dict() if self.teacher else "",
+            'created_at': self.created_at
         }
 
 class Enrollment(db.Model):
@@ -91,3 +97,15 @@ class Enrollment(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     course_id = db.Column(db.Integer, db.ForeignKey("course.id"))
     lesson_id = db.Column(db.Integer, db.ForeignKey("lesson.id"))
+
+    user = db.relationship('User')
+    lessons = db.relationship('Lesson')
+    course = db.relationship('Course')
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'user': self.user.to_dict(),
+            'course': self.course.to_dict() if self.course else "",
+            'lesson': self.lesson.to_dict() if self.lesson else ""
+        }

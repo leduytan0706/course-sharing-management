@@ -200,11 +200,12 @@ addCourseForm.addEventListener('submit', (e) => {
     .then(data => {
         console.log('Upload success:', data);
         const newCourseId = data.course_id;
+        alert('Course added successfully!');
         window.location.href = '/admin/courses/'+newCourseId;
     })
     .catch(err => console.error('Error:', err));
 
-    alert('Course added successfully!');
+    
 });
 
 

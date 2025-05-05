@@ -50,8 +50,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         handleCourseClick();
 
         handleCourseDeleteBtns();
-
-        handleCourseCancelBtns();
     })
     .catch((err) => {
         console.log(err);
@@ -62,9 +60,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 const handleCourseDeleteBtns = () => {
     const courseDeleteBtns = document.querySelectorAll(".course-delete-btn");
     courseDeleteBtns.forEach(btn => {
-        btn.addEventListener('click', async () => {
-            backdropContainer.classList.toggle("backdrop-show");
-            backdropModal.innerHTML=`<div class="course-delete-card">
+        btn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            const courseRow = btn.closest("tr");
+            const courseId = courseRow.id.split("-")[1];
+            backdropContainer.classList.toggle("hidden");
+            backdropModal.innerHTML=`
+            <div class="course-delete-card">
                 <div class="card-header"></div>
                 <div class="card-content">
                     <div class="card-content-title">
@@ -72,32 +74,56 @@ const handleCourseDeleteBtns = () => {
                     </div>
                     <div class="card-content-action">
                         <button type="button" class="action-btn cancel-btn">Cancel</button>
-                        <button type="button" class="action-btn confirm-btn">Delete</button>
+                        <button type="button" class="action-btn confirm-btn" id="deleteCourse-${courseId}">Delete</button>
                     </div>
                 </div>
             </div>`;
-            backdropModal.classList.toggle("modal-hidden");
-        })
+            backdropModal.classList.toggle("hidden");
+
+            handleCourseCancelBtns();
+            handleCourseConfirmBtns();
+        });
     });
 };
 
 const handleCourseCancelBtns = () => {
-    const cancelBtn = document.querySelectorAll("cancel-btn");
-    cancelBtn.forEach(btn => {
-        btn.addEventListener('click', () => {
-            backdropModal.classList.toggle("modal-hidden");
-            backdropContainer.classList.toggle("backdrop-show");
-        });
+    const cancelBtn = document.getElementsByClassName("cancel-btn")[0];
+    console.log(cancelBtn);
+    cancelBtn.addEventListener('click', () => {
+        backdropModal.classList.toggle("hidden");
+        backdropContainer.classList.toggle("hidden");
+        backdropModal.innerHTML= "";
     });
 };
 
 const handleCourseClick = () => {
     courseTableRows.forEach(courseRow => {
         courseRow.addEventListener("click", () => {
+            
             const courseId = courseRow.id.split("-")[1];
             console.log(courseId);
             window.location.href = '/admin/courses/'+courseId;
         })
     })
-}
+};
+
+const handleCourseConfirmBtns = () => {
+    const confirmBtn = document.getElementsByClassName("confirm-btn")[0];
+    confirmBtn.addEventListener('click', () => {
+        const courseId = confirmBtn.id.split("-")[1];
+        console.log(courseId);
+        fetch("/api/admin/courses/delete/"+courseId,
+            {
+                "method": "DELETE"
+            }
+        )
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message);
+            window.location.href = '/admin/courses';
+
+        })
+        .catch(err => console.error(err));
+    });
+};
 

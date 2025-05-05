@@ -1,12 +1,12 @@
-.courses-page{
+.lessons-page{
 
-    .courses-header{
+    .lessons-header{
         display: grid;
         grid-template-columns: 1fr 1fr;
         padding-bottom: 1rem;
 
 
-        .courses-header-title{
+        .lessons-header-title{
             
             h2{
                 margin: 0;
@@ -15,7 +15,7 @@
             }
         }
 
-        .courses-header-action{
+        .lessons-header-action{
 
             .add-btn{
                 box-sizing: border-box;
@@ -42,22 +42,22 @@
         }
     }
 
-    .courses-content{
+    .lessons-content{
         box-sizing: border-box;
-        .courses-content-filter{
+        .lessons-content-filter{
             box-sizing: border-box;
 
         }
 
-        .courses-content-table{
+        .lessons-content-table{
             box-sizing: border-box;
             width: 100%;
             border-collapse: collapse;
 
-            .courses-table-head, .courses-table-data{
+            .lessons-table-head, .lessons-table-data{
                 box-sizing: border-box;
                 display: grid;
-                grid-template-columns: auto 10% 50% 10% 10% 10%;
+                grid-template-columns: auto 30% 35% 20% 10% ;
                 background-color: white;
             }
 
@@ -69,12 +69,12 @@
 
             }
 
-            .courses-table-head{
+            .lessons-table-head{
                 border: 1px solid rgb(220, 220, 220);
 
             }
 
-            .courses-table-data{
+            .lessons-table-data{
                 margin: 1rem 0;
                 box-shadow: rgba(4, 12, 59, 0.316) 0px 3px 3px;
                 border-radius: 10px;
@@ -85,20 +85,13 @@
 
                     padding: 1rem 0.5rem;
 
-                    img{
-                        width: 70px;
-                        height: 70px;
-                        border-radius: 5px;
-                    }
-
-
                     .edit-icon, .delete-icon{
                         font-size: 1.4rem;
                         transition: all 0.2s ease-in-out;
 
                     }
 
-                    .course-edit-btn{
+                    .lesson-edit-btn{
                         padding: 0.3rem;
                         background-color: white;
 
@@ -113,7 +106,7 @@
                         }
                     }
 
-                    .course-delete-btn{
+                    .lesson-delete-btn{
                         background-color: white;
                         padding: 0.3rem;
                         border: none;

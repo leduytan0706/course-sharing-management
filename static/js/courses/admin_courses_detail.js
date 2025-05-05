@@ -1,3 +1,6 @@
+import courseCategories from "../courseCategories.js";
+import courseLevels from "../courseLevels.js";
+
 const imagePreview = document.getElementsByClassName("course-image-preview")[0];
 const lessonContainer = document.getElementsByClassName("course-lesson-tbody")[0];
 const courseName = document.getElementById("course-name");
@@ -10,10 +13,11 @@ let numberOfLessons = 1;
 
 document.addEventListener("DOMContentLoaded", async () => {
 
-    const imagePlaceholder = await getImagePlaceholder();
-
     const pathParts = window.location.pathname.split('/');
-    courseId = pathParts[pathParts.length - 1];
+    console.log(pathParts);
+    const courseId = pathParts[pathParts.length - 1];
+
+    const imagePlaceholder = await getImagePlaceholder();
 
     console.log("Course ID:", courseId); // "1"
     fetch('/api/admin/courses/'+courseId, {
@@ -31,8 +35,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         courseName.textContent=courseData.name || "";
         courseIntro.textContent=courseData.intro || "";
         courseNumOfLessons.textContent=courseData.number_of_lessons || numberOfLessons;
-        courseCategory.textContent=courseData.category.name || "";
-        courseLevel.textContent=courseData.level || "";
+        courseCategory.textContent=courseData.category.name? courseCategories[courseData.category.name]: courseCategories["other"];
+        courseLevel.textContent=courseData.level? courseLevels[courseData.level] : "";
         courseDesc.textContent=courseData.description || "";
         console.log(courseData.image_url);
         imagePreview.src=courseData.image_url || imagePlaceholder;
@@ -50,8 +54,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             lessonContainer.insertAdjacentHTML('beforeend', existingLessons);
         })
     .catch(err => console.error('Error:', err));
-
-    
 });
 
 const getImagePlaceholder = async () => {
