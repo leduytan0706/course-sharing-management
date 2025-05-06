@@ -4,7 +4,6 @@ const lessonsTableBody = document.getElementById("lessons-table-body");
 const backdropContainer = document.getElementById("backdrop");
 const backdropModal = document.getElementById("modal");
 let lessonTableRows;
-const confirmBtn = document.querySelectorAll("confirm-btn");
 
 document.addEventListener("DOMContentLoaded", async () => {
     let lessonsRow = ``;
@@ -45,8 +44,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         handleLessonClick();
 
         handleLessonDeleteBtns();
-
-        handleLessonCancelBtns();
     })
     .catch((err) => {
         console.log(err);
@@ -55,11 +52,15 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 const handleLessonDeleteBtns = () => {
-    const courseDeleteBtns = document.querySelectorAll(".lesson-delete-btn");
-    courseDeleteBtns.forEach(btn => {
-        btn.addEventListener('click', async () => {
-            backdropContainer.classList.toggle("backdrop-show");
-            backdropModal.innerHTML=`<div class="lesson-delete-card">
+    const lessonDeleteBtns = document.querySelectorAll(".lesson-delete-btn");
+    lessonDeleteBtns.forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            const lessonRow = btn.closest("tr");
+            const lessonId = lessonRow.id.split("-")[1];
+            backdropContainer.classList.toggle("hidden");
+            backdropModal.innerHTML=`
+            <div class="course-delete-card">
                 <div class="card-header"></div>
                 <div class="card-content">
                     <div class="card-content-title">
@@ -67,22 +68,24 @@ const handleLessonDeleteBtns = () => {
                     </div>
                     <div class="card-content-action">
                         <button type="button" class="action-btn cancel-btn">Cancel</button>
-                        <button type="button" class="action-btn confirm-btn">Delete</button>
+                        <button type="button" class="action-btn confirm-btn" id="deleteCourse-${lessonId}">Delete</button>
                     </div>
                 </div>
             </div>`;
-            backdropModal.classList.toggle("modal-hidden");
-        })
+            backdropModal.classList.toggle("hidden");
+
+            handleLessonCancelBtns();
+            handleLessonConfirmBtns();
+        });
     });
 };
 
 const handleLessonCancelBtns = () => {
-    const cancelBtn = document.querySelectorAll("cancel-btn");
-    cancelBtn.forEach(btn => {
-        btn.addEventListener('click', () => {
-            backdropModal.classList.toggle("modal-hidden");
-            backdropContainer.classList.toggle("backdrop-show");
-        });
+    const cancelBtn = document.getElementsByClassName("cancel-btn")[0];
+    cancelBtn.addEventListener('click', () => {
+        backdropModal.classList.toggle("hidden");
+        backdropContainer.classList.toggle("hidden");
+        backdropModal.innerHTML= "";
     });
 };
 
@@ -94,5 +97,25 @@ const handleLessonClick = () => {
             window.location.href = '/admin/lessons/'+lessonId;
         })
     })
-}
+};
+
+const handleLessonConfirmBtns = () => {
+    const confirmBtn = document.getElementsByClassName("confirm-btn")[0];
+    confirmBtn.addEventListener('click', () => {
+        const lessonId = confirmBtn.id.split("-")[1];
+        console.log(lessonId);
+        fetch("/api/admin/lessons/delete/"+lessonId,
+            {
+                method: "DELETE"
+            }
+        )
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message);
+            window.location.href = '/admin/lessons';
+
+        })
+        .catch(err => console.error(err));
+    });
+};
 

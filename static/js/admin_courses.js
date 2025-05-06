@@ -3,7 +3,6 @@ const backdropContainer = document.getElementById("backdrop");
 const backdropModal = document.getElementById("modal");
 const courseBody = document.getElementById("courses-table-body");
 let courseTableRows;
-const confirmBtn = document.querySelectorAll("confirm-btn");
 
 document.addEventListener("DOMContentLoaded", async () => {
     let coursesRow = ``;
@@ -114,7 +113,7 @@ const handleCourseConfirmBtns = () => {
         console.log(courseId);
         fetch("/api/admin/courses/delete/"+courseId,
             {
-                "method": "DELETE"
+                method: "DELETE"
             }
         )
         .then(response => response.json())

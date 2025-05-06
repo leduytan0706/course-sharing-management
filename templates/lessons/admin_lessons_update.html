@@ -1,10 +1,10 @@
 {% extends './layout/admin_base.html'%}
 {%block style%}
-<link href="{{url_for('static',filename='css/lessons/admin_lessons_create.css')}}" rel="stylesheet" />
+<link href="{{url_for('static',filename='css/lessons/admin_lessons_update.css')}}" rel="stylesheet" />
 {%endblock%}
 {% block content %}
-<div class="add-lesson">
-    <div class="add-lesson-header align-left">
+<div class="update-lesson">
+    <div class="update-lesson-header align-left">
         <div class="header-return align-left">
             <a 
                 href="/admin/lessons"
@@ -16,11 +16,11 @@
         </div>
         <div class="header-title align-left">
             <p class="return-text">Return to courses</p>
-            <h2 class="title-text">Add New Lesson</h2>
+            <h2 class="title-text">Update Lesson</h2>
         </div>
     </div>
-    <div class="add-lesson-section">
-        <form class="add-lesson-form" method="POST" >
+    <div class="update-lesson-section">
+        <form class="update-lesson-form" method="PUT" >
             <div class="course-select-section">
                 <div class="form-field course-title-field">
                     <label for="courseId" class="form-label">
@@ -87,7 +87,7 @@
             </div>
             <div class="lesson-submit-section align-center">
                 <button type="submit" class="submit-btn align-center">
-                    <span class="submit-lesson-btnTitle">Add New Lesson</span>
+                    <span class="submit-lesson-btnTitle">Update Lesson</span>
                 </button>
             </div>
         </form>
@@ -95,5 +95,5 @@
 </div>
 {% endblock %}
 {%block javascript%}
-<script type="module" src="{{url_for('static', filename='js/lessons/admin_lessons_create.js')}}"></script>
+<script type="module" src="{{url_for('static', filename='js/lessons/admin_lessons_update.js')}}"></script>
 {%endblock%}

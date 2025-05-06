@@ -82,6 +82,3 @@ updateCourseForm.addEventListener('submit', (e) => {
 });
 
 
-const validateAddCourseForm = () => {
-
-}

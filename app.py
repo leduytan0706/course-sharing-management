@@ -54,7 +54,7 @@ def lessons_page():
     return render_template("admin_lessons.html")
 
 @app.route("/admin/lessons/<int:id>", methods=["GET"])
-def detail_lesson_page(): 
+def detail_lesson_page(id): 
     return render_template("lessons/admin_lessons_detail.html")
 
 @app.route("/admin/lessons/new", methods=["GET"])
@@ -62,12 +62,12 @@ def add_lesson_page():
     return render_template("lessons/admin_lessons_create.html")
 
 @app.route("/admin/lessons/update/<int:id>", methods=["GET"])
-def update_lesson_page(): 
+def update_lesson_page(id): 
     return render_template("lessons/admin_lessons_update.html")
 
 @app.route("/api/admin/courses", methods=["GET"])
 def get_courses():
-    user_id = request.cookies.get("user_id", "")
+    user_id = request.cookies.get("user_id", 2)
     try:
         user = User.query.get_or_404(user_id)
         if not user or user.role not in ["teacher","admin"]:
@@ -103,7 +103,7 @@ def get_courses():
     
 @app.route("/api/admin/courses/<int:id>", methods=["GET"])
 def get_course_by_id(id):
-    user_id = request.cookies.get("user_id", "")
+    user_id = request.cookies.get("user_id", 2)
     try:
         user = User.query.get_or_404(user_id)
         if not user or user.role not in ["teacher","admin"]:
@@ -217,6 +217,12 @@ def update_course(id):
         return jsonify({
             "message": "Unauthorized access"
         }), 400
+    
+    selected_lesson = Lesson.query.get_or_404(id)
+    if not selected_lesson:
+        return jsonify({
+            "message": "Lesson not found"
+        }), 404
 
     updated_course_data = {
         "name": request.form.get("name"),
@@ -237,7 +243,7 @@ def update_course(id):
 
     # image_url = ""
     # Logic gửi dữ liệu ảnh lên cloudinary
-    image_url = ""
+    image_url = selected_lesson.image_url
     if updated_course_data["image"]:
         response = cloudinary.uploader.upload(updated_course_data["image"])
         image_url = response['secure_url']
@@ -287,7 +293,9 @@ def delete_course(id):
         }), 400
     
     try:
-        response = Course.query.filter(id==id).delete()
+        response = Lesson.query.filter(Lesson.course_id==id).delete()
+
+        response = Course.query.filter(Course.id==id).delete()
         db.session.commit()
         return jsonify({
             "message": "Course deleted successfully!"
@@ -300,7 +308,7 @@ def delete_course(id):
 
 @app.route("/api/admin/lessons", methods=["GET", "POST"])
 def get_lessons(): 
-    user_id = request.cookies.get("user_id", "")
+    user_id = request.cookies.get("user_id", 2)
     try:
         user = User.query.get_or_404(int(user_id))
         if not user or user.role not in ["teacher","admin"]:
@@ -339,7 +347,7 @@ def get_lessons():
     
 @app.route("/api/admin/lessons/<int:id>", methods=["GET"])
 def get_lesson_by_id(id):
-    user_id = request.cookies.get("user_id", "")
+    user_id = request.cookies.get("user_id", 2)
     try:
         user = User.query.get_or_404(user_id)
         if not user or user.role not in ["teacher","admin"]:
@@ -351,8 +359,18 @@ def get_lesson_by_id(id):
             return jsonify({
                 "message": "Lesson not found"
             }), 404
+        
+        selected_course = Course.query.get_or_404(selected_lesson.course_id)
+        if not selected_course:
+            return jsonify({
+                "message": "Course not found"
+            }), 404
+        
         return jsonify({
-            "lesson": selected_lesson.to_dict()
+            "lesson": {
+                **selected_lesson.to_dict(),
+                "courseName": selected_course.name 
+            }
         }), 200
     except:
         print("Error getting lesson")
@@ -362,15 +380,128 @@ def get_lesson_by_id(id):
 
 @app.route("/api/admin/lessons/new", methods=["POST"])
 def add_lesson():
-    return ""
+    user_id = request.cookies.get("user_id", 2)
+    try:
+        user = User.query.get_or_404(user_id)
+        if not user or user.role not in ["teacher","admin"]:
+            return jsonify({
+                "message": "Unauthorized access"
+            }), 400
+        course_id = request.form.get("courseId", "")
+        selected_course = Course.query.get_or_404(course_id)
+        if not selected_course:
+            return jsonify({
+                "message": "Course not found."
+            })
+        
+        lesson_video = request.files.get("lessonVideo", None)
+        lesson_video_url = ""
+        if lesson_video:
+            response = cloudinary.uploader.upload(lesson_video, resource_type='video')
+            lesson_video_url = response['secure_url']
+
+        new_lesson = Lesson(
+            name=request.form.get("lessonName"),
+            content=request.form.get("lessonContent"),
+            video_url=lesson_video_url,
+            teacher_id=user_id,
+            course_id=selected_course.id
+        )
+
+        db.session.add(new_lesson)
+        db.session.commit()
+        print("Thêm mới bài học thành công!")
+        return jsonify({
+            "message": "Lesson created successfully!",
+            "lesson_id": new_lesson.id
+        }), 201
+
+    except SQLAlchemyError as e:
+        print("Error adding lesson:", e)
+        return jsonify({
+            "message": "There was an error adding lesson. Try again later."
+        }), 500
 
 @app.route("/api/admin/lessons/update/<int:id>", methods=["PUT"])
-def update_lesson():
-    return ""
+def update_lesson(id):
+    user_id = request.cookies.get("user_id", 2)
+    try:
+        user = User.query.get_or_404(user_id)
+        if not user or user.role not in ["teacher","admin"]:
+            return jsonify({
+                "message": "Unauthorized access"
+            }), 400
+        
+        selected_lesson = Lesson.query.get_or_404(id)
+        if not selected_lesson:
+            return jsonify({
+                "message": "Lesson not found."
+            }), 404
+        
+
+        course_id = request.form.get("courseId", "")
+        selected_course = Course.query.get_or_404(course_id)
+        if not selected_course:
+            return jsonify({
+                "message": "Course not found."
+            })
+        
+        lesson_video = request.files.get("lessonVideo", None)
+        lesson_video_url = selected_lesson.video_url
+        if lesson_video:
+            response = cloudinary.uploader.upload(lesson_video, resource_type='video')
+            lesson_video_url = response['secure_url']
+    
+        existing_video_url = selected_lesson.to_dict().video_url
+        if len(existing_video_url) > 0:
+            response = cloudinary.uploader.destroy(existing_video_url, resource_type='video')
+
+        selected_lesson.name = request.form.get("lessonName")
+        selected_lesson.content = request.form.get("lessonContent")
+        selected_lesson.video_url = lesson_video_url
+        selected_lesson.teacher_id = user_id
+        selected_lesson.course_id = selected_course.id
+
+        db.session.commit()
+        print("Cập nhật bài học thành công!")
+        return jsonify({
+            "message": "Lesson updated successfully!",
+            "lesson_id": selected_lesson.id
+        }), 200
+
+    except SQLAlchemyError as e:
+        print("Error updating lesson:", e)
+        return jsonify({
+            "message": "There was an error updating lesson. Try again later."
+        }), 500
 
 @app.route("/api/admin/lessons/delete/<int:id>", methods=["DELETE"])
-def delete_lesson():
-    return ""
+def delete_lesson(id):
+    user_id = request.cookies.get("user_id", 2)
+    try:
+        user = User.query.get_or_404(user_id)
+        if not user or user.role not in ["teacher","admin"]:
+            return jsonify({
+                "message": "Unauthorized access"
+            }), 400
+        
+        selected_lesson = Lesson.query.get_or_404(id)
+        if not selected_lesson:
+            return jsonify({
+                "message": "Lesson not found."
+            }), 404
+        
+        response = Lesson.query.filter(Lesson.id==id).delete()
+        db.session.commit()
+        return jsonify({
+            "message": "Lesson delete successfully!"
+        }), 200
+        
+    except SQLAlchemyError as e:
+        print("Error deleting lesson:", e)
+        return jsonify({
+            "message": "There was an error deleting lesson. Try again later."
+        }), 500
 
 @app.route("/api/admin/teachers", methods=["GET"])
 def get_teachers():
